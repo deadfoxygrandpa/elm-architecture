@@ -7,7 +7,8 @@
         "src"
     ],
     "exposed-modules": [
-        "Architecture"
+        "Architecture",
+        "Architecture.Simple"
     ],
     "dependencies": {
         "elm-lang/core": "2.0.1 <= v < 4.0.0",

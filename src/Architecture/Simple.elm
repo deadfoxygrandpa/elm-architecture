@@ -1,4 +1,5 @@
-module StartApp.Simple where
+module Architecture.Simple (..) where
+
 {-| This module makes it super simple to get started making a typical web app.
 This is what you want if you are new to Elm, still getting a handle on the
 syntax and patterns.
@@ -14,8 +15,9 @@ shockingly pleasant. Definitely read [the tutorial][arch] to get started!
 -}
 
 import Debug
-import Html exposing (Html)
 import Signal exposing (Address)
+import Effects
+import Architecture
 
 
 {-| The configuration has three key components:
@@ -40,11 +42,11 @@ hard in other languages.
 [address]: http://package.elm-lang.org/packages/elm-lang/core/2.0.1/Signal#Mailbox
 [arch]: https://github.com/evancz/elm-architecture-tutorial/
 -}
-type alias Config model action =
-    { model : model
-    , view : Address action -> model -> Html
-    , update : action -> model -> model
-    }
+type alias Config model action output =
+  { model : model
+  , view : Address action -> model -> output
+  , update : action -> model -> model
+  }
 
 
 {-| This starts up your application. The following code sets up a counter
@@ -78,24 +80,37 @@ Notice that the program cleanly breaks up into model, update, and view.
 This means it is super easy to test your update logic independent of any
 rendering.
 -}
-start : Config model action -> Signal Html
+start : Config model action output -> Signal output
 start config =
   let
-    actions =
-      Signal.mailbox Nothing
+    generalConfig =
+      { init = ( config.model, Effects.none )
+      , update = (\action model -> ( config.update action model, Effects.none ))
+      , view = config.view
+      , inputs = []
+      }
 
-    address =
-      Signal.forwardTo actions.address Just
-
-    update maybeAction model =
-      case maybeAction of
-        Just action ->
-            config.update action model
-
-        Nothing ->
-            Debug.crash "This should never happen."
-
-    model =
-      Signal.foldp update config.model actions.signal
+    app =
+      Architecture.start generalConfig
   in
-    Signal.map (config.view address) model
+    app.output
+
+
+
+--start : Config model action output -> Signal output
+--start config =
+--  let
+--    actions =
+--      Signal.mailbox Nothing
+--    address =
+--      Signal.forwardTo actions.address Just
+--    update maybeAction model =
+--      case maybeAction of
+--        Just action ->
+--          config.update action model
+--        Nothing ->
+--          Debug.crash "This should never happen."
+--    model =
+--      Signal.foldp update config.model actions.signal
+--  in
+--    Signal.map (config.view address) model
