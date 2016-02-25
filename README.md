@@ -42,7 +42,7 @@ update action model =
 
 ## Further Learning
 
-Check out the full documentation for this library [here](http://package.elm-lang.org/packages/deadfoxygrandpa/architecture/latest/).
+Check out the full documentation for this library [here](http://package.elm-lang.org/packages/deadfoxygrandpa/elm-architecture/latest/).
 
 For more guidelines and examples of making apps in Elm, check out the following resources:
 
