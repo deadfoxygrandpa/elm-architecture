@@ -1,7 +1,10 @@
 module Architecture (start, Config, Module) where
 
-{-| This module helps you start your application in a typical Elm workflow.
-It assumes you are following [the Elm Architecture][arch] and using
+{-| This module helps you create a complex signal in a typical Elm workflow.
+It is an abstraction based on [StartApp][start-app]. Where StartApp allows you
+to create a `Signal Html`, this package allows you to create a `Signal a`, as
+long as you supply a function `view : Signal.Adress Action -> Model -> a`.
+It otherwise assumes you are following [the Elm Architecture][arch] and using
 [elm-effects][]. From there it will wire everything up for you!
 
 **Be sure to [read the Elm Architecture tutorial][arch] to learn how this all
@@ -9,6 +12,7 @@ works!**
 
 [arch]: https://github.com/evancz/elm-architecture-tutorial
 [elm-effects]: http://package.elm-lang.org/packages/evancz/elm-effects/latest
+[start-app]: http://package.elm-lang.org/packages/evancz/start-app/latest
 
 # Start your Application
 @docs start, Config, Module
@@ -26,7 +30,8 @@ The `init` transaction will give you an initial model and create any tasks that
 are needed on start up.
 
 The `update` and `view` fields describe how to step the model and view the
-model.
+model. Note that the biggest difference between this package and StartApp is
+that the view function can produce any type, not only Html.
 
 The `inputs` field is for any external signals you might need. If you need to
 get values from JavaScript, they will come in through a port as a signal which
@@ -42,8 +47,9 @@ type alias Config model action output =
 
 {-| An `Module` is made up of a couple signals:
 
-  * `html` &mdash; a signal of `Html` representing the current visual
-    representation of your app. This should be fed into `main`.
+  * `output` &mdash; a signal of `output` representing the current visual
+    representation of your module. This is the primary Signal intended for use
+    as the output of this package.
 
   * `model` &mdash; a signal representing the current model. Generally you
     will not need this one, but it is there just in case. You will know if you
@@ -66,15 +72,15 @@ type alias Module model output =
     app =
         start { init = init, view = view, update = update, inputs = [] }
 
-    main =
+    output =
         app.output
 
     port tasks : Signal (Task.Task Never ())
     port tasks =
         app.tasks
 
-So once we start the `Module` we feed the HTML into `main` and feed the resulting
-tasks into a `port` that will run them all.
+So once we start the `Module` we feed the output signal into our main
+application and feed the resulting tasks into a `port` that will run them all.
 -}
 start : Config model action output -> Module model output
 start config =
